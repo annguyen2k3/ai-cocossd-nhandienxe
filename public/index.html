@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhận diện dòng xe</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+
+<body class="container mt-5">
+    <h2 class="text-center">Nhận diện hãng xe - dòng xe</h2>
+
+    <div class="text-center mt-2">
+        <button class="btn btn-outline-info" onclick="showModelInfo()">Xem thông tin mô hình</button>
+    </div>
+
+    <form id="upload-form" class="d-flex flex-column align-items-center mt-5">
+        <div class="mb-3">
+            <label class="form-label">Chọn ảnh:</label>
+            <input type="file" class="form-control" id="image-input" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Nhận diện</button>
+    </form>
+
+    <div class="mt-4 text-center">
+        <h4>Kết quả:</h4>
+        <p id="result">Chưa có kết quả</p>
+        <img id="preview" src="" alt="Ảnh đã chọn" class="img-fluid mt-3" style="max-width: 300px; display: none;">
+    </div>
+
+    <script>
+        document.getElementById("upload-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const imageInput = document.getElementById("image-input");
+            const file = imageInput.files[0];
+
+            if (!file) {
+                alert("Vui lòng chọn ảnh!");
+                return;
+            }
+
+            // ✅ Kiểm tra định dạng ảnh trước khi gửi lên server
+            const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/bmp"];
+            if (!allowedTypes.includes(file.type)) {
+                alert("❌ Định dạng ảnh không hợp lệ! Chỉ hỗ trợ JPG, PNG, GIF, BMP.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("image", file);
+
+            // Hiển thị ảnh xem trước
+            const reader = new FileReader();
+            reader.onload = () => {
+                document.getElementById("preview").src = reader.result;
+                document.getElementById("preview").style.display = "block";
+            };
+            reader.readAsDataURL(file);
+
+            // Gửi ảnh lên server
+            const response = await fetch("/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            const resultElement = document.getElementById("result");
+
+            if (data.confidence) {
+                resultElement.innerHTML = `Dự đoán: <b>${data.prediction}</b>`;
+            } else {
+                resultElement.innerHTML = `❌ ${data.prediction}`;
+            }
+        });
+
+        async function showModelInfo() {
+            try {
+                const res = await fetch("/model-info.json");
+                const data = await res.json();
+
+                let info = `📊 Thông tin mô hình:\n\n`;
+                info += `- Tổng số ảnh: ${data.totalImages}\n`;
+                info += `- Số vòng lặp (epochs): ${data.epochs}\n`;
+                info += `- Accuracy cuối cùng: ${data.accuracy}%\n`;
+                info += `- Ảnh theo dòng xe:\n`;
+
+                for (const key in data.imagesPerClass) {
+                    info += `   • ${key}: ${data.imagesPerClass[key]} ảnh\n`;
+                }
+
+                alert(info);
+            } catch (err) {
+                alert("❌ Không thể tải thông tin mô hình.");
+            }
+        }
+    </script>
+</body>
+
+</html>

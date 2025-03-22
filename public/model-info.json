@@ -1,0 +1,21 @@
+{
+  "totalImages": 2108,
+  "epochs": 10,
+  "classNames": [
+    "toyota-camry",
+    "toyota-fortuner",
+    "toyota-inova",
+    "vin-vf3",
+    "vin-vf7",
+    "vin-luxA2.0"
+  ],
+  "imagesPerClass": {
+    "toyota-camry": 412,
+    "toyota-fortuner": 408,
+    "toyota-inova": 440,
+    "vin-vf3": 212,
+    "vin-vf7": 324,
+    "vin-luxA2.0": 312
+  },
+  "accuracy": "100.00"
+}
