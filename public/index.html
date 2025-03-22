@@ -12,7 +12,7 @@
     <h2 class="text-center">Nhận diện hãng xe - dòng xe</h2>
 
     <div class="text-center mt-2">
-        <button class="btn btn-outline-info" onclick="showModelInfo()">Xem thông tin mô hình</button>
+        <a href="./info-model.html" class="btn btn-outline-info">Xem thông tin mô hình</a>
     </div>
 
     <form id="upload-form" class="d-flex flex-column align-items-center mt-5">
@@ -74,27 +74,6 @@
                 resultElement.innerHTML = `❌ ${data.prediction}`;
             }
         });
-
-        async function showModelInfo() {
-            try {
-                const res = await fetch("/model-info.json");
-                const data = await res.json();
-
-                let info = `📊 Thông tin mô hình:\n\n`;
-                info += `- Tổng số ảnh: ${data.totalImages}\n`;
-                info += `- Số vòng lặp (epochs): ${data.epochs}\n`;
-                info += `- Accuracy cuối cùng: ${data.accuracy}%\n`;
-                info += `- Ảnh theo dòng xe:\n`;
-
-                for (const key in data.imagesPerClass) {
-                    info += `   • ${key}: ${data.imagesPerClass[key]} ảnh\n`;
-                }
-
-                alert(info);
-            } catch (err) {
-                alert("❌ Không thể tải thông tin mô hình.");
-            }
-        }
     </script>
 </body>
 

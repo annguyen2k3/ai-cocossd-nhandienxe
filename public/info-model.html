@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin mô hình</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 2rem;
+        }
+
+        .matrix-cell {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+
+        .matrix-header {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>📊 Thông tin mô hình huấn luyện</h2>
+    <div id="model-info" class="mt-4"></div>
+
+    <script>
+        async function renderModelInfo() {
+            try {
+                const res = await fetch("/model-info.json");
+                const data = await res.json();
+
+                let html = `
+                    <p><b>Tổng số ảnh:</b> ${data.totalImages}</p>
+                    <p><b>Số vòng lặp (epochs):</b> ${data.epochs}</p>
+                    <p><b>Accuracy cuối cùng:</b> ${data.accuracy}%</p>
+                    <p><b>F1-score trung bình:</b> ${data.f1Score}</p>
+                    <h5>📸 Ảnh mỗi dòng xe:</h5>
+                    <ul>
+                `;
+                for (const label in data.imagesPerClass) {
+                    html += `<li>${label}: ${data.imagesPerClass[label]} ảnh</li>`;
+                }
+                html += `</ul>`;
+
+                // Per class metrics
+                html += `
+                <h5>📈 Ma trận nhầm lẫn - Đánh giá theo từng lớp</h5>
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>Dòng xe</th>
+                            <th>TP</th>
+                            <th>FP</th>
+                            <th>FN</th>
+                            <th>TN</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>F1</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.perClassMetrics.map(m => `
+                            <tr>
+                                <td>${m.class}</td>
+                                <td>${m.TP}</td>
+                                <td>${m.FP}</td>
+                                <td>${m.FN}</td>
+                                <td>${m.TN}</td>
+                                <td>${m.precision}</td>
+                                <td>${m.recall}</td>
+                                <td>${m.f1}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <ul>
+        <li><strong>TP: </strong>Số lượng phân loại chính xác</li>
+        <li><strong>FP: </strong>Bị lớp khác phân loại nhầm vào</li>
+        <li><strong>FN: </strong>Phân loại nhầm vào lớp khác</li>
+        <li><strong>TN: </strong>Tổng các lớp còn lại được phân loại chính xác</li>
+    </ul>
+
+                `;
+
+
+
+                html += `
+                <h5>📊 Trung bình</h5>
+                <ul>
+                    <li>Precision (Macro): <b>${data.macroAverage.precision}</b></li>
+                    <li>Recall (Macro): <b>${data.macroAverage.recall}</b></li>
+                    <li>Precision (Micro): <b>${data.microAverage.precision}</b></li>
+                    <li>Recall (Micro): <b>${data.microAverage.recall}</b></li>
+                    <li>F1-score tổng hợp: <b>${data.f1Score}</b></li>
+                </ul>
+                <a href="/" class="btn btn-secondary mt-3">⬅ Quay lại trang nhận diện</a>
+                `;
+
+                document.getElementById("model-info").innerHTML = html;
+
+            } catch (e) {
+                document.getElementById("model-info").innerText = "❌ Không thể tải thông tin mô hình.";
+            }
+        }
+
+        renderModelInfo();
+    </script>
+</body>
+
+</html>
